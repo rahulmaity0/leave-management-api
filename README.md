@@ -40,13 +40,23 @@ set DB_PASSWORD=yourpassword
 
 Hibernate creates the tables on startup.
 
-One thing to watch out for if you already had employee rows in the database from
-before: the `leave_balance` column gets added as null for them, and that blows up when
-it's read back into an int field. Run this once and you're fine:
+One thing to watch out for if you already had employee rows in the table: the app won't
+start. `leaveBalance` is an `int`, so Hibernate tries to add the column as `not null`,
+and Postgres refuses because the existing rows would have nothing in it:
+
+```
+ERROR: column "leave_balance" of relation "employeemodel" contains null values
+```
+
+Hibernate rolls the whole change back, so the column isn't left half-created — you just
+add it yourself with a default, once, and then start the app normally:
 
 ```sql
-UPDATE employeemodel SET leave_balance = 20 WHERE leave_balance IS NULL;
+ALTER TABLE employeemodel ADD COLUMN IF NOT EXISTS leave_balance integer NOT NULL DEFAULT 20;
 ```
+
+This is the sort of thing a proper migration tool handles for you, which is why Flyway
+is on the to-do list below.
 
 ## Endpoints
 
@@ -146,6 +156,7 @@ The DTOs are Java records, which is why you'll see `request.employeeId()` rather
   "you can't approve your own leave" check gets a lot more meaningful.
 - Half-day leave.
 - Public holidays and weekends currently count as leave days.
+- Flyway migrations instead of `ddl-auto=update`.
 - Docker and a CI workflow.
 - The older employee classes use lowercase names (`employeemodel`, `employeeservice`)
   from when I first wrote them. The leave classes follow normal Java naming.
