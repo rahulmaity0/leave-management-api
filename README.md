@@ -1,5 +1,7 @@
 # Leave Management API
 
+[![CI](https://github.com/rahulmaity0/leave-management-api/actions/workflows/ci.yml/badge.svg)](https://github.com/rahulmaity0/leave-management-api/actions/workflows/ci.yml)
+
 A Spring Boot REST API for handling employee leave requests. An employee applies for
 leave, a manager approves or rejects it, and the system keeps track of how many days
 everyone has left.
